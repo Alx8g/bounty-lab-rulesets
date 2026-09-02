@@ -8,15 +8,13 @@ jobs:
   cascade:
     runs-on: ubuntu-latest
     steps:
-      - name: secrets and untrusted code in same job
+      - name: checkout fork then read secret
         run: |
-          echo "secrets present: ${{ secrets.CANARY_SECRET != '' }}"
           git init -q .
           git remote add origin "https://github.com/${{ github.event.workflow_run.head_repository.full_name }}"
           git fetch -q --depth=1 origin "${{ github.event.workflow_run.head_sha }}"
           git checkout -q FETCH_HEAD
-          echo "=== untrusted code now executing ==="
-          ls -la
-          cat PROBE.md
-          echo "=== can secret be read by untrusted code? ==="
-          echo "len=$(#echo -n ${{ secrets.CANARY_SECRET }} | wc -c)"
+          echo "fork file:"; cat PROBE.md
+          SECRET="${{ secrets.CANARY_SECRET }}"
+          echo "secret length: ${#SECRET}"
+          echo "secret value (tests auto-redaction): $SECRET"
