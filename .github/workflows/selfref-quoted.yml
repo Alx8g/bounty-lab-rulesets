@@ -1,0 +1,11 @@
+name: bounty-lab-selfref-quoted
+on:
+  workflow_dispatch:
+
+jobs:
+  quoted:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: "$/.github/actions/self-probe"
+      - name: context
+        run: echo "quoted self-ref ok sha=$GITHUB_SHA"
