@@ -1,0 +1,20 @@
+name: cache-trusted-restore
+on:
+  workflow_dispatch:
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/cache@v4
+        id: c
+        with:
+          path: ./pdir
+          key: pr-scope-45bf894a952beb5bb792ec92bec87c253b173d35
+      - run: |
+          echo "hit=${{ steps.c.outputs.cache-hit }}"
+          if [ -f pdir/m.txt ]; then
+            echo "CROSS-SCOPE RESTORE: $(cat pdir/m.txt)"
+          else
+            echo "restore failed or empty (boundary held)"
+          fi
