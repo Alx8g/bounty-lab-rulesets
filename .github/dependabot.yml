@@ -1,0 +1,14 @@
+version: 2
+registries:
+  lab-registry:
+    type: npm-registry
+    url: https://ssrf-target.iad.github.net
+    username: probe
+    password: probe
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    registries:
+      - lab-registry
