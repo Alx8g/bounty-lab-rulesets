@@ -1,0 +1,28 @@
+name: cache-scope-probe
+on:
+  pull_request_target:
+  workflow_dispatch:
+
+jobs:
+  cacheprobe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: write cache from this context
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ./probe-dir
+          key: probe-cache-${{ github.event_name }}-${{ github.run_id }}
+          restore-keys: |
+            probe-cache-
+      - name: create content and re-save
+        run: |
+          mkdir -p probe-dir
+          echo "poison-marker-${{ github.event_name }}-run-${{ github.run_id }}" > probe-dir/marker.txt
+      - name: report
+        run: |
+          echo "event=${{ github.event_name }}"
+          echo "ref=${{ github.ref }}"
+          echo "sha=${{ github.sha }}"
+          echo "cache_hit=${{ steps.cache.outputs.cache-hit }}"
+          echo "CACHE_SCOPE_MARKER=$(cat probe-dir/marker.txt 2>/dev/null || echo none)"
