@@ -1,0 +1,11 @@
+name: bounty-lab-self-ref
+on:
+  workflow_dispatch:
+
+jobs:
+  use-self:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: $/.github/actions/self-probe
+      - name: context
+        run: echo "workflow sees: sha=$GITHUB_SHA ref=$GITHUB_REF"
