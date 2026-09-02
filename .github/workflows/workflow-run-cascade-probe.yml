@@ -1,0 +1,24 @@
+name: workflow-run-cascade-probe
+on:
+  workflow_run:
+    workflows: ["cache-pr-rw-probe"]
+    types: [completed]
+
+jobs:
+  cascade:
+    runs-on: ubuntu-latest
+    steps:
+      - name: inspect triggering context
+        run: |
+          echo "triggering run id: ${{ github.event.workflow_run.id }}"
+          echo "triggering repo: ${{ github.event.workflow_run.head_repository.full_name }}"
+          echo "triggering branch: ${{ github.event.workflow_run.head_branch }}"
+          echo "am I on default? ${{ github.ref }}"
+          echo "secrets present: ${{ secrets.CANARY_SECRET != '' }}"
+      - name: attempt untrusted checkout (the dangerous pattern)
+        run: |
+          git init -q .
+          git remote add origin "https://github.com/${{ github.event.workflow_run.head_repository.full_name }}"
+          git fetch -q --depth=1 origin "${{ github.event.workflow_run.head_sha }}" || echo "fetch failed"
+          git checkout -q FETCH_HEAD 2>/dev/null || echo "checkout failed"
+          ls -la
