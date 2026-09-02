@@ -1,0 +1,23 @@
+name: runner-context-probe
+on:
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: context boundaries
+        run: |
+          echo "=== runner identity ==="
+          whoami; id
+          echo "=== can we see other jobs/hosts? ==="
+          ip -brief addr | head -5
+          echo "=== docker socket present? ==="
+          ls -la /var/run/docker.sock 2>/dev/null || echo "no docker.sock"
+          echo "=== metadata svc ==="
+          curl -s -m 3 -o /dev/null -w "%{http_code}
+" -H "Metadata: true" http://169.254.169.254/metadata/instance?api-version=2021-02-01
+          echo "=== internal DNS resolve attempts ==="
+          for h in ssrf-target.iad.github.net github.net files.github.net; do
+            getent hosts $h >/dev/null 2>&1 && echo "$h RESOLVED" || echo "$h nxdomain"
+          done
