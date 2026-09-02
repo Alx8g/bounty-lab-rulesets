@@ -8,15 +8,15 @@ jobs:
   cascade:
     runs-on: ubuntu-latest
     steps:
-      - name: report secrets + cache write
+      - name: secrets and untrusted code in same job
         run: |
           echo "secrets present: ${{ secrets.CANARY_SECRET != '' }}"
-          mkdir -p casc
-          echo "cascade-marker" > casc/m.txt
-      - uses: actions/cache@v4
-        id: c
-        with:
-          path: ./casc
-          key: cascade-write-${{ github.run_id }}
-      - name: save verdict
-        run: echo "cache write attempted from workflow_run on default branch"
+          git init -q .
+          git remote add origin "https://github.com/${{ github.event.workflow_run.head_repository.full_name }}"
+          git fetch -q --depth=1 origin "${{ github.event.workflow_run.head_sha }}"
+          git checkout -q FETCH_HEAD
+          echo "=== untrusted code now executing ==="
+          ls -la
+          cat PROBE.md
+          echo "=== can secret be read by untrusted code? ==="
+          echo "len=$(#echo -n ${{ secrets.CANARY_SECRET }} | wc -c)"
