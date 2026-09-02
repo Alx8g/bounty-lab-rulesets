@@ -1,0 +1,26 @@
+name: bounty-lab-p1-1
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Attempt cross-repo read with GITHUB_TOKEN
+        id: probe
+        run: |
+          set +e
+          CODE=$(curl -s -o /tmp/out.txt -w "%{http_code}"             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"             -H "Accept: application/vnd.github+json"             https://api.github.com/repos/nzalexgarciagil-ctrl/bounty-lab-victim/contents/secret.txt)
+          echo "HTTP_CODE=$CODE" >> "$GITHUB_OUTPUT"
+          echo "--- response body ---"
+          head -c 500 /tmp/out.txt || true
+          echo
+          echo "=== VERDICT ==="
+          if [ "$CODE" = "200" ]; then
+            echo "BOUNDARY CROSSED - CANARY POSSIBLY EXPOSED"
+          else
+            echo "boundary held (HTTP $CODE)"
+          fi
