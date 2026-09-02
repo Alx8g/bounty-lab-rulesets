@@ -8,17 +8,15 @@ jobs:
   cascade:
     runs-on: ubuntu-latest
     steps:
-      - name: inspect triggering context
+      - name: report secrets + cache write
         run: |
-          echo "triggering run id: ${{ github.event.workflow_run.id }}"
-          echo "triggering repo: ${{ github.event.workflow_run.head_repository.full_name }}"
-          echo "triggering branch: ${{ github.event.workflow_run.head_branch }}"
-          echo "am I on default? ${{ github.ref }}"
           echo "secrets present: ${{ secrets.CANARY_SECRET != '' }}"
-      - name: attempt untrusted checkout (the dangerous pattern)
-        run: |
-          git init -q .
-          git remote add origin "https://github.com/${{ github.event.workflow_run.head_repository.full_name }}"
-          git fetch -q --depth=1 origin "${{ github.event.workflow_run.head_sha }}" || echo "fetch failed"
-          git checkout -q FETCH_HEAD 2>/dev/null || echo "checkout failed"
-          ls -la
+          mkdir -p casc
+          echo "cascade-marker" > casc/m.txt
+      - uses: actions/cache@v4
+        id: c
+        with:
+          path: ./casc
+          key: cascade-write-${{ github.run_id }}
+      - name: save verdict
+        run: echo "cache write attempted from workflow_run on default branch"
