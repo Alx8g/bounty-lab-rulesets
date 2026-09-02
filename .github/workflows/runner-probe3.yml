@@ -1,0 +1,19 @@
+name: runner-probe3
+on:
+  push:
+    paths: ['.github/workflows/runner-probe3.yml']
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: context
+        run: |
+          whoami
+          id
+          ls -la /var/run/docker.sock 2>/dev/null || echo "no docker.sock"
+          for h in ssrf-target.iad.github.net github.net files.github.net; do
+            getent hosts $h || echo "$h nxdomain"
+          done
+          curl -s -m 3 -o /dev/null -w "metadata:%{http_code}
+" http://169.254.169.254/metadata/instance || echo "metadata unreachable"
