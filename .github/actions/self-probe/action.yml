@@ -1,0 +1,8 @@
+name: 'self-ref probe'
+description: 'prints resolved sha and repo'
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        echo "action sees: GITHUB_SHA=$GITHUB_SHA GITHUB_REF=$GITHUB_REF GITHUB_REPOSITORY=$GITHUB_REPOSITORY"
+      shell: bash
