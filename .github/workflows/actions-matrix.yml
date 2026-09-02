@@ -1,0 +1,28 @@
+name: bounty-lab-actions-matrix
+on:
+  workflow_dispatch:
+
+jobs:
+  producer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: make artifact
+        run: |
+          echo "artifact-canary-1234" > canary.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: probe-artifact
+          path: canary.txt
+      - name: dump token lifetime info
+        run: |
+          curl -s -I -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/nzalexgarciagil-ctrl/bounty-lab-rulesets | grep -i "github-authentication-token-expiration" || echo "no expiration header"
+  consumer:
+    needs: producer
+    runs-on: ubuntu-latest
+    steps:
+      - name: pull artifact cross-job (same repo, different job)
+        uses: actions/download-artifact@v4
+        with:
+          name: probe-artifact
+      - name: verify
+        run: cat canary.txt || echo "artifact not found cross-job"
