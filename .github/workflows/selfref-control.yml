@@ -1,0 +1,10 @@
+name: bounty-lab-selfref-control
+on:
+  workflow_dispatch:
+
+jobs:
+  control:
+    runs-on: ubuntu-latest
+    steps:
+      - name: context
+        run: echo "control workflow ok sha=$GITHUB_SHA"
