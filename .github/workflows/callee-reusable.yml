@@ -1,0 +1,11 @@
+name: callee-reusable
+on:
+  workflow_call:
+
+jobs:
+  inner:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: $/.github/actions/self-probe
+      - name: report
+        run: echo "callee reusable sees sha=$GITHUB_SHA repo=$GITHUB_REPOSITORY ref=$GITHUB_REF"
