@@ -1,0 +1,30 @@
+name: bounty-lab-p1-2
+on:
+  pull_request_target:
+
+permissions:
+  contents: read
+
+jobs:
+  p12:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Explicit unsafe checkout (attacker-controlled sha)
+        run: |
+          git init -q .
+          git remote add origin "https://github.com/${{ github.event.pull_request.head.repo.full_name }}"
+          git fetch -q --depth=1 origin "${{ github.event.pull_request.head.sha }}"
+          git checkout -q FETCH_HEAD
+          echo "checked out head sha: $(git rev-parse HEAD)"
+          echo "files at root:"
+          ls -la
+      - name: Show secret presence
+        run: |
+          echo "len(CANARY_SECRET)=${#CANARY_SECRET}"
+          if [ -n "$CANARY_SECRET" ]; then
+            echo "SECRET PRESENT IN ENV (value redacted)"
+          else
+            echo "secret NOT in env"
+          fi
+        env:
+          CANARY_SECRET: ${{ secrets.CANARY_SECRET }}
